@@ -7,8 +7,6 @@ services:
       - "27077:27017"
     volumes:
       - mongo-data:/data/db
-    networks:
-      - ramadan-network
 
   backend:
     build: ./backend
@@ -22,8 +20,6 @@ services:
       - ADMIN_PASS=ramadan2026
     depends_on:
       - mongodb
-    networks:
-      - ramadan-network
 
   frontend:
     build: ./frontend
@@ -33,13 +29,13 @@ services:
       - backend
     networks:
       - server
-      - ramadan-network
+      - default
 
 networks:
   server:
     external: true
-  ramadan-network:
-    driver: bridge
+  default:
+
 
 volumes:
   mongo-data:
