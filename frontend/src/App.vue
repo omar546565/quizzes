@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen relative overflow-hidden">
     <!-- Background elements (stars/moon) could be added here -->
-    <router-view v-slot="{ Component }">
+    <router-view v-slot="slotProps">
       <transition 
         name="fade" 
         mode="out-in"
       >
-        <component :is="Component" v-if="Component" />
+        <component :is="slotProps.Component" v-if="slotProps && slotProps.Component" />
       </transition>
     </router-view>
     
