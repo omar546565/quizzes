@@ -1,25 +1,30 @@
 <template>
   <div class="min-h-screen relative overflow-hidden">
     <!-- Background elements (stars/moon) could be added here -->
-    <router-view v-slot="slotProps">
+    <router-view v-slot="{ Component }">
       <transition 
-        v-if="slotProps && slotProps.Component"
         name="fade" 
         mode="out-in"
       >
-        <component :is="slotProps.Component" />
+        <component :is="Component" v-if="Component" />
       </transition>
     </router-view>
     
     <!-- Global audio elements for effects -->
-    <audio ref="correctSound" src="/sounds/correct.mp3" preload="auto"></audio>
-    <audio ref="wrongSound" src="/sounds/wrong.mp3" preload="auto"></audio>
-    <audio ref="timerSound" src="/sounds/timer.mp3" preload="auto"></audio>
+    <div v-show="false">
+      <audio ref="correctSound" src="/sounds/correct.mp3" preload="auto"></audio>
+      <audio ref="wrongSound" src="/sounds/wrong.mp3" preload="auto"></audio>
+      <audio ref="timerSound" src="/sounds/timer.mp3" preload="auto"></audio>
+    </div>
   </div>
 </template>
 
 <script setup>
-// Global setup if needed
+import { ref } from 'vue'
+
+const correctSound = ref(null)
+const wrongSound = ref(null)
+const timerSound = ref(null)
 </script>
 
 <style>
