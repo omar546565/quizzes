@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     port: 3000,
+    host: true,
+    allowedHosts: ['ramadan.aleppocity.store'],
     proxy: {
       '/api': {
         target: 'http://backend:5000',
