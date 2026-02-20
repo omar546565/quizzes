@@ -64,19 +64,34 @@
           </div>
 
           <!-- Options -->
-          <div v-if="showingOptions" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 animate-fade-in">
+          <div v-if="showingOptions || waitingForNext" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 animate-fade-in">
             <button 
               v-for="(opt, idx) in currentQuestion.options" 
               :key="idx"
-              @click="checkAnswer(opt)"
-              class="p-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-all text-right"
+              @click="!waitingForNext && checkAnswer(opt)"
+              :disabled="waitingForNext"
+              :class="[
+                'p-4 border rounded-xl transition-all text-right relative overflow-hidden',
+                waitingForNext && opt === currentQuestion.correctAnswer ? 'bg-green-600/30 border-green-500 gold-glow' : 
+                waitingForNext && selectedAnswer === opt && opt !== currentQuestion.correctAnswer ? 'bg-red-600/30 border-red-500' :
+                'bg-slate-800 hover:bg-slate-700 border-slate-700'
+              ]"
             >
               <span class="text-ramadan-gold ml-2">({{ String.fromCharCode(65 + idx) }})</span> {{ opt }}
+              <div v-if="waitingForNext && opt === currentQuestion.correctAnswer" class="absolute left-4 top-1/2 -translate-y-1/2 text-green-400">✔️</div>
+            </button>
+          </div>
+
+          <!-- Next Button -->
+          <div v-if="waitingForNext" class="flex justify-center mt-10 animate-fade-in">
+            <button @click="nextRound" class="bg-ramadan-gold text-ramadan-blue px-12 py-4 rounded-2xl font-bold text-xl gold-glow transform hover:scale-105 transition-all flex items-center gap-3">
+               السؤال التالي
+               <span class="text-2xl">←</span>
             </button>
           </div>
 
           <!-- Logic Controls -->
-          <div v-if="!showingOptions" class="flex justify-center gap-4 mt-8">
+          <div v-if="!showingOptions && !waitingForNext" class="flex justify-center gap-4 mt-8">
             <button @click="answerCorrect(true)" class="bg-green-600 hover:bg-green-500 px-8 py-3 rounded-xl font-bold transform hover:scale-105 transition-all">إجابة صحيحة (10 نقاط)</button>
             <button @click="showOptions" class="bg-red-600 hover:bg-red-500 px-8 py-3 rounded-xl font-bold transform hover:scale-105 transition-all">إجابة خاطئة (6 خيارات)</button>
           </div>
@@ -136,6 +151,8 @@ const timer = ref(null)
 const selectedContestant = ref(null)
 const currentTeamType = ref('teamA') // 'teamA' or 'teamB'
 const showingOptions = ref(false)
+const waitingForNext = ref(false)
+const selectedAnswer = ref(null)
 
 const showCorrectOverlay = ref(false)
 const showWrongOverlay = ref(false)
@@ -168,10 +185,16 @@ const fetchData = async () => {
     const res = await axios.get(`/api/quizzes/${quizId}`)
     quiz.value = res.data
     
+    // Resume progress
+    questionIndex.value = quiz.value.currentQuestionIndex || 0
+    currentTeamType.value = quiz.value.currentTeamType || 'teamA'
+
     const p = quiz.value.participations
     if (p.teamA.activeContestants.length === 10 && p.teamB.activeContestants.length === 10) {
-      teamsReady.value = true
-      startRound()
+      if (!teamsReady.value) {
+        teamsReady.value = true
+        startRound()
+      }
     } else {
       setTimeout(fetchData, 3000)
     }
@@ -209,36 +232,58 @@ const answerCorrect = async (direct) => {
   confetti()
   setTimeout(() => showCorrectOverlay.value = false, 2000)
 
+  const nextIndex = questionIndex.value + 1
+  const nextTeam = currentTeamType.value === 'teamA' ? 'teamB' : 'teamA'
+
   try {
     const res = await axios.post('/api/quizzes/score', { 
         quizId: quiz.value._id, 
         teamType: currentTeamType.value, 
-        points 
+        points,
+        currentQuestionIndex: nextIndex,
+        currentTeamType: nextTeam
     })
     quiz.value = res.data
   } catch (e) { console.error(e) }
 
-  nextRound()
+  waitingForNext.value = true
 }
 
 const showOptions = () => showingOptions.value = true
 
 const checkAnswer = (answer) => {
+  selectedAnswer.value = answer
   if (answer === currentQuestion.value.correctAnswer) answerCorrect(false)
   else answerWrong()
 }
 
-const answerWrong = () => {
+const answerWrong = async () => {
   clearInterval(timer.value)
   showWrongOverlay.value = true
   setTimeout(() => showWrongOverlay.value = false, 2000)
-  nextRound()
+  
+  const nextIndex = questionIndex.value + 1
+  const nextTeam = currentTeamType.value === 'teamA' ? 'teamB' : 'teamA'
+
+  try {
+    const res = await axios.post('/api/quizzes/score', { 
+        quizId: quiz.value._id, 
+        currentQuestionIndex: nextIndex,
+        currentTeamType: nextTeam
+    })
+    quiz.value = res.data
+  } catch (e) { console.error(e) }
+
+  waitingForNext.value = true
 }
 
 const nextRound = () => {
-  questionIndex.value++
-  currentTeamType.value = currentTeamType.value === 'teamA' ? 'teamB' : 'teamA'
-  setTimeout(startRound, 3000)
+  questionIndex.value = quiz.value.currentQuestionIndex
+  currentTeamType.value = quiz.value.currentTeamType
+  waitingForNext.value = false
+  selectedAnswer.value = null
+  
+  startRound()
 }
 
 const triggerConfetti = () => {

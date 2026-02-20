@@ -20,7 +20,9 @@ const quizSchema = new mongoose.Schema({
             score: { type: Number, default: 0 },
             activeContestants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Contestant' }]
         }
-    }
+    },
+    currentQuestionIndex: { type: Number, default: 0 },
+    currentTeamType: { type: String, default: 'teamA' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Quiz', quizSchema);

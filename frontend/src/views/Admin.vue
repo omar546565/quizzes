@@ -94,6 +94,7 @@
           </button>
           <router-link :to="'/quiz/' + quiz._id" class="bg-indigo-600/20 text-indigo-400 px-4 py-1 rounded-full text-sm">بدء</router-link>
           <button @click="manageParticipants(quiz)" class="bg-indigo-600/20 text-indigo-400 px-4 py-1 rounded-full text-sm">تحديد المشاركين</button>
+          <button @click="resetQuiz(quiz._id)" class="bg-red-900/40 text-red-300 px-4 py-1 rounded-full text-sm border border-red-500/20">تصفير النتائج 🔄</button>
           <button @click="editQuiz(quiz)" class="bg-orange-600/20 text-orange-400 px-4 py-1 rounded-full text-sm">تعديل</button>
           <button @click="deleteQuiz(quiz._id)" class="bg-red-600/20 text-red-400 px-4 py-1 rounded-full text-sm">حذف</button>
         </div>
@@ -267,6 +268,17 @@ const deleteQuiz = async (id) => {
   if (!confirm('حذف المسابقة؟')) return
   await axios.delete(`/api/quizzes/${id}`)
   fetchQuizzes()
+}
+
+const resetQuiz = async (id) => {
+  if (!confirm('هل أنت متأكد من تصفير نتائج هذه المسابقة؟ لا يمكن التراجع عن هذا الإجراء.')) return
+  try {
+    await axios.post(`/api/quizzes/${id}/reset`)
+    alert('تم تصفير النتائج وإعادة ضبط التقدم بنجاح')
+    fetchQuizzes()
+  } catch (e) {
+    alert('فشل تصفير النتائج')
+  }
 }
 
 const toggleRegistration = async (quiz) => {

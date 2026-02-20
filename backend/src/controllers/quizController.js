@@ -55,16 +55,52 @@ exports.deleteQuiz = async (req, res) => {
 
 exports.updateScore = async (req, res) => {
     try {
-        const { quizId, teamType, points } = req.body; // teamType: 'teamA' or 'teamB'
-        const updateField = `participations.${teamType}.score`;
+        const { quizId, teamType, points, currentQuestionIndex, currentTeamType } = req.body;
+
+        const update = {};
+        if (points !== undefined && teamType) {
+            update.$inc = { [`participations.${teamType}.score`]: points };
+        }
+
+        if (currentQuestionIndex !== undefined) {
+            update.currentQuestionIndex = currentQuestionIndex;
+        }
+
+        if (currentTeamType) {
+            update.currentTeamType = currentTeamType;
+        }
+
         const quiz = await Quiz.findByIdAndUpdate(
             quizId,
-            { $inc: { [updateField]: points } },
+            update,
             { new: true }
         ).populate('participations.teamA.teamId')
             .populate('participations.teamB.teamId')
             .populate('participations.teamA.activeContestants')
             .populate('participations.teamB.activeContestants');
+        res.json(quiz);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.resetQuizResults = async (req, res) => {
+    try {
+        const quiz = await Quiz.findByIdAndUpdate(
+            req.params.id,
+            {
+                'participations.teamA.score': 0,
+                'participations.teamB.score': 0,
+                currentQuestionIndex: 0,
+                currentTeamType: 'teamA'
+            },
+            { new: true }
+        ).populate('participations.teamA.teamId')
+            .populate('participations.teamB.teamId')
+            .populate('participations.teamA.activeContestants')
+            .populate('participations.teamB.activeContestants');
+
+        if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
         res.json(quiz);
     } catch (error) {
         res.status(500).json({ error: error.message });
