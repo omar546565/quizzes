@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const quizSchema = new mongoose.Schema({
     name: { type: String, required: true },
     day: { type: Number, required: true },
+    registrationOpen: { type: Boolean, default: true },
     questions: [{
         text: String,
         correctAnswer: String,

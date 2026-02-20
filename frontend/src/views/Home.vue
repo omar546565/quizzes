@@ -12,17 +12,11 @@
       أهلاً بكم في نظام المسابقات الرمضانية. شارك في المسابقات، نافس أصدقائك، واربح النقاط!
     </p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-      <router-link to="/register" class="glass-panel p-8 hover:bg-ramadan-gold/20 transition-all group border-ramadan-gold/30">
-        <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">👤</div>
-        <h2 class="text-2xl font-bold mb-2">تسجيل متسابق</h2>
-        <p class="text-sm text-gray-400">انضم إلى مسابقة اليوم وكن جزءاً من الفريق</p>
-      </router-link>
-
-      <router-link to="/admin" class="glass-panel p-8 hover:bg-ramadan-gold/20 transition-all group border-ramadan-gold/30">
+    <div class="flex justify-center w-full max-w-2xl px-4">
+      <router-link to="/admin" class="glass-panel p-8 hover:bg-ramadan-gold/20 transition-all group border-ramadan-gold/30 w-full md:w-2/3">
         <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">⚙️</div>
         <h2 class="text-2xl font-bold mb-2">إدارة المسابقات</h2>
-        <p class="text-sm text-gray-400">إضافة مسابقات جديدة، متسابقين، ومتابعة النتائج</p>
+        <p class="text-sm text-gray-400">إضافة مسابقات جديدة، إدارة الفرق، ومتابعة النتائج</p>
       </router-link>
     </div>
 

@@ -12,7 +12,7 @@ exports.createQuiz = async (req, res) => {
 
 exports.getAllQuizzes = async (req, res) => {
     try {
-        const quizzes = await Quiz.find().select('name day createdAt');
+        const quizzes = await Quiz.find().select('name day registrationOpen createdAt');
         res.json(quizzes);
     } catch (error) {
         res.status(500).json({ error: error.message });

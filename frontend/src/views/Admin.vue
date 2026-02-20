@@ -83,8 +83,16 @@
           <div class="font-bold text-lg">{{ quiz.name }}</div>
           <div class="text-sm text-gray-400">يوم: {{ quiz.day }} | {{ new Date(quiz.createdAt).toLocaleDateString('ar-EG') }}</div>
         </div>
-        <div class="flex gap-2 flex-wrap">
-          <router-link :to="'/quiz/' + quiz._id" class="bg-green-600/20 text-green-400 px-4 py-1 rounded-full text-sm">بدء</router-link>
+        <div class="flex gap-2 flex-wrap items-center">
+          <div class="flex items-center gap-2 bg-slate-900/50 px-3 py-1 rounded-full border border-slate-700">
+            <span class="text-xs text-gray-500">الرابط:</span>
+            <button @click="copyRegLink(quiz._id)" class="text-ramadan-gold text-xs hover:underline">نسخ 🔗</button>
+          </div>
+          <button @click="toggleRegistration(quiz)" 
+                  :class="['px-4 py-1 rounded-full text-sm transition-colors', quiz.registrationOpen ? 'bg-green-600/20 text-green-400 hover:bg-green-600/30' : 'bg-red-600/20 text-red-500 hover:bg-red-600/30']">
+            {{ quiz.registrationOpen ? 'التسجيل مفتوح ✅' : 'التسجيل مغلق 🔒' }}
+          </button>
+          <router-link :to="'/quiz/' + quiz._id" class="bg-indigo-600/20 text-indigo-400 px-4 py-1 rounded-full text-sm">بدء</router-link>
           <button @click="manageParticipants(quiz)" class="bg-indigo-600/20 text-indigo-400 px-4 py-1 rounded-full text-sm">تحديد المشاركين</button>
           <button @click="editQuiz(quiz)" class="bg-orange-600/20 text-orange-400 px-4 py-1 rounded-full text-sm">تعديل</button>
           <button @click="deleteQuiz(quiz._id)" class="bg-red-600/20 text-red-400 px-4 py-1 rounded-full text-sm">حذف</button>
@@ -219,12 +227,22 @@ const editQuiz = async (quiz) => {
   try {
     const res = await axios.get(`/api/quizzes/${quiz._id}`)
     newQuiz.value = res.data
-    // Ensure data structure exists
-    if (!newQuiz.value.participations) {
-        newQuiz.value.participations = {
-            teamA: { teamId: null, score: 0, activeContestants: [] },
-            teamB: { teamId: null, score: 0, activeContestants: [] }
-        }
+    
+    // Convert populated objects to IDs for v-model compatibility
+    if (newQuiz.value.participations) {
+      if (newQuiz.value.participations.teamA.teamId?._id) {
+        newQuiz.value.participations.teamA.teamId = newQuiz.value.participations.teamA.teamId._id
+      }
+      if (newQuiz.value.participations.teamB.teamId?._id) {
+        newQuiz.value.participations.teamB.teamId = newQuiz.value.participations.teamB.teamId._id
+      }
+      newQuiz.value.participations.teamA.activeContestants = newQuiz.value.participations.teamA.activeContestants.map(c => c._id || c)
+      newQuiz.value.participations.teamB.activeContestants = newQuiz.value.participations.teamB.activeContestants.map(c => c._id || c)
+    } else {
+      newQuiz.value.participations = {
+        teamA: { teamId: null, score: 0, activeContestants: [] },
+        teamB: { teamId: null, score: 0, activeContestants: [] }
+      }
     }
     isEditing.value = true
     currentEditId.value = quiz._id
@@ -249,6 +267,23 @@ const deleteQuiz = async (id) => {
   if (!confirm('حذف المسابقة؟')) return
   await axios.delete(`/api/quizzes/${id}`)
   fetchQuizzes()
+}
+
+const toggleRegistration = async (quiz) => {
+  try {
+    await axios.put(`/api/quizzes/${quiz._id}`, {
+      registrationOpen: !quiz.registrationOpen
+    })
+    fetchQuizzes()
+  } catch (e) {
+    alert('فشل تحديث حالة التسجيل')
+  }
+}
+
+const copyRegLink = (quizId) => {
+  const url = `${window.location.origin}/register/${quizId}`
+  navigator.clipboard.writeText(url)
+  alert('تم نسخ رابط التسجيل لهذه المسابقة بنجاح!')
 }
 
 const manageParticipants = async (quiz) => {
