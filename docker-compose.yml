@@ -32,9 +32,12 @@ services:
     depends_on:
       - backend
     networks:
+      - server
       - ramadan-network
 
 networks:
+  server:
+    external: true
   ramadan-network:
     driver: bridge
 
