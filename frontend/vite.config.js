@@ -9,7 +9,8 @@ export default defineConfig({
     allowedHosts: ['ramadan.aleppocity.store'],
     hmr: {
       host: 'ramadan.aleppocity.store',
-      protocol: 'wss'
+      protocol: 'wss',
+      clientPort: 443
     },
     proxy: {
       '/api': {
