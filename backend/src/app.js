@@ -20,6 +20,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/quizzes', require('./routes/quizRoutes'));
 app.use('/api/contestants', require('./routes/contestantRoutes'));
 app.use('/api/teams', require('./routes/teamRoutes'));
+app.use('/api/info', require('./routes/infoRoutes'));
+app.use('/api/system', require('./routes/systemRoutes'));
 
 // Health Check
 app.get('/health', (req, res) => {

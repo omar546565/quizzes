@@ -13,7 +13,7 @@ exports.login = async (req, res) => {
             const token = jwt.sign(
                 { username },
                 process.env.JWT_SECRET || 'ramadan_secret_key',
-                { expiresIn: '24h' }
+                { expiresIn: '30d' }
             );
             return res.json({ token });
         }
