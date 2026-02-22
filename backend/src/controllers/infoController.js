@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const InfoCategory = require('../models/InfoCategory');
 const InfoModel = require('../models/InfoModel');
 const InfoQuestion = require('../models/InfoQuestion');
