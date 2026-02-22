@@ -23,14 +23,14 @@
       <!-- Current Status: Waiting for Teams, or Question Active -->
       <div v-if="!teamsReady" class="text-center p-12 glass-panel gold-glow">
         <div class="text-6xl mb-4 animate-spin">⏳</div>
-        <h2 class="text-2xl gold-text">بانتظار اختيار المتسابقين (10 لكل فريق)</h2>
-        <p class="text-gray-400 mt-2">يجب على المسئول اختيار 10 متسابقين مشاركين لكل فريق من لوحة التحكم...</p>
+        <h2 class="text-2xl gold-text">بانتظار اختيار المتسابقين ({{ quiz?.settings?.maxParticipants || 10 }} لكل فريق)</h2>
+        <p class="text-gray-400 mt-2">يجب على المسئول اختيار {{ quiz?.settings?.maxParticipants || 10 }} متسابقين مشاركين لكل فريق من لوحة التحكم...</p>
         <div class="mt-4 flex justify-center gap-8">
-          <div :class="quiz?.participations?.teamA?.activeContestants?.length === 10 ? 'text-green-400' : 'text-red-400'">
-            الفريق أ: {{ quiz?.participations?.teamA?.activeContestants?.length || 0 }} / 10
+          <div :class="quiz?.participations?.teamA?.activeContestants?.length === (quiz?.settings?.maxParticipants || 10) ? 'text-green-400' : 'text-red-400'">
+            الفريق أ: {{ quiz?.participations?.teamA?.activeContestants?.length || 0 }} / {{ quiz?.settings?.maxParticipants || 10 }}
           </div>
-          <div :class="quiz?.participations?.teamB?.activeContestants?.length === 10 ? 'text-green-400' : 'text-red-400'">
-            الفريق ب: {{ quiz?.participations?.teamB?.activeContestants?.length || 0 }} / 10
+          <div :class="quiz?.participations?.teamB?.activeContestants?.length === (quiz?.settings?.maxParticipants || 10) ? 'text-green-400' : 'text-red-400'">
+            الفريق ب: {{ quiz?.participations?.teamB?.activeContestants?.length || 0 }} / {{ quiz?.settings?.maxParticipants || 10 }}
           </div>
         </div>
       </div>
@@ -190,7 +190,8 @@ const fetchData = async () => {
     currentTeamType.value = quiz.value.currentTeamType || 'teamA'
 
     const p = quiz.value.participations
-    if (p.teamA.activeContestants.length === 10 && p.teamB.activeContestants.length === 10) {
+    const max = quiz.value.settings?.maxParticipants || 10
+    if (p.teamA.activeContestants.length === max && p.teamB.activeContestants.length === max) {
       if (!teamsReady.value) {
         teamsReady.value = true
         startRound()

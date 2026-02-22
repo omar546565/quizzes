@@ -22,7 +22,10 @@ const quizSchema = new mongoose.Schema({
         }
     },
     currentQuestionIndex: { type: Number, default: 0 },
-    currentTeamType: { type: String, default: 'teamA' }
+    currentTeamType: { type: String, default: 'teamA' },
+    settings: {
+        maxParticipants: { type: Number, default: 10 }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Quiz', quizSchema);

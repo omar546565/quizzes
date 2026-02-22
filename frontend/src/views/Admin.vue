@@ -49,6 +49,10 @@
               <label class="block text-sm text-gray-400 mb-1">اليوم</label>
               <input v-model="newQuiz.day" type="number" placeholder="1" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-lg focus:outline-none focus:border-ramadan-gold" />
             </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">عدد المتسابقين لكل فريق</label>
+              <input v-model="newQuiz.settings.maxParticipants" type="number" placeholder="10" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-lg focus:outline-none focus:border-ramadan-gold" />
+            </div>
           </div>
 
           <!-- Team Selection -->
@@ -342,9 +346,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <!-- Team A Selection -->
           <div class="glass-panel p-6 border-blue-500/20">
-            <h3 class="font-bold mb-4 text-blue-400 flex justify-between">
+            <h3 class="font-bold mb-4 text-blue-400 flex justify-between text-sm md:text-base">
               {{ selectedQuiz?.participations.teamA.teamId?.name || 'فريق أ' }}
-              <span>({{ selectedQuiz?.participations.teamA.activeContestants.length || 0 }} / 10)</span>
+              <span>({{ selectedQuiz?.participations.teamA.activeContestants.length || 0 }} / {{ selectedQuiz?.settings?.maxParticipants || 10 }})</span>
             </h3>
             <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
               <label v-for="c in teamAMembers" :key="c._id" class="flex items-center gap-3 p-2 bg-slate-800/50 rounded hover:bg-slate-800 transition-colors cursor-pointer">
@@ -357,9 +361,9 @@
 
           <!-- Team B Selection -->
           <div class="glass-panel p-6 border-green-500/20">
-            <h3 class="font-bold mb-4 text-green-400 flex justify-between">
+            <h3 class="font-bold mb-4 text-green-400 flex justify-between text-sm md:text-base">
               {{ selectedQuiz?.participations.teamB.teamId?.name || 'فريق ب' }}
-              <span>({{ selectedQuiz?.participations.teamB.activeContestants.length || 0 }} / 10)</span>
+              <span>({{ selectedQuiz?.participations.teamB.activeContestants.length || 0 }} / {{ selectedQuiz?.settings?.maxParticipants || 10 }})</span>
             </h3>
             <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
               <label v-for="c in teamBMembers" :key="c._id" class="flex items-center gap-3 p-2 bg-slate-800/50 rounded hover:bg-slate-800 transition-colors cursor-pointer">
@@ -405,6 +409,9 @@ const newQuiz = ref({
   participations: {
     teamA: { teamId: null, score: 0, activeContestants: [] },
     teamB: { teamId: null, score: 0, activeContestants: [] }
+  },
+  settings: {
+    maxParticipants: 10
   }
 })
 
@@ -510,6 +517,10 @@ const editQuiz = async (quiz) => {
   try {
     const res = await axios.get(`/api/quizzes/${quiz._id}`)
     newQuiz.value = res.data
+    // Ensure settings exist for older quizzes
+    if (!newQuiz.value.settings) {
+      newQuiz.value.settings = { maxParticipants: 10 }
+    }
     if (newQuiz.value.participations) {
       if (newQuiz.value.participations.teamA.teamId?._id) newQuiz.value.participations.teamA.teamId = newQuiz.value.participations.teamA.teamId._id
       if (newQuiz.value.participations.teamB.teamId?._id) newQuiz.value.participations.teamB.teamId = newQuiz.value.participations.teamB.teamId._id
@@ -531,6 +542,9 @@ const cancelEdit = () => {
     participations: {
       teamA: { teamId: null, score: 0, activeContestants: [] },
       teamB: { teamId: null, score: 0, activeContestants: [] }
+    },
+    settings: {
+      maxParticipants: 10
     }
   }
 }
